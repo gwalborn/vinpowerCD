@@ -1,4 +1,20 @@
 #!/bin/bash
+#Prerequisites:
+#	abcde
+#	lame
+#	opus-tools
+#	ffmpeg
+#	flac
+#	musepack-tools
+#	python
+#	fdkaac
+#	wavpack
+# Note: Other programs may be required depending on your abcde configuration (.abcde.conf)
+#
+# This code will rip any number of CDs to FLAC and attempt to tag and name the
+# resultant tracks.  CDROM should be set to the device of the drive in the robot
+# and ROBOT should be set to the serial device control for the robot
+#
 CDROM=/dev/sr1
 ROBOT=/dev/ttyUSB0
 command_robot () {
@@ -15,7 +31,7 @@ reset_robot () {
 rip_disc () {
 	date						#Show date/time
 	reset_robot
-	command_robot S00	"Get status"	 	#Get robot status
+	command_robot S00  "Get status"		 	#Get robot status
 	# Get next disc
 	command_robot "I00" "Get disc"			#Get disc in robot
 	if [[ "$RESULT" == "E" ]]; then
@@ -25,22 +41,22 @@ rip_disc () {
 	sleep 2
 	echo "Open tray"
 	eject $CDROM
-	sleep 3 								#Wait 3 seconds for tray to open
+	sleep 3 					#Wait 3 seconds for tray to open
 	command_robot "R00"	"Drop disc in tray"	#Drop disc into tray
-	eject -t $CDROM							#Close tray
-	sleep 30								#Wait for disc to read
-	abcde									#Rip disc
+	eject -t $CDROM					#Close tray
+	sleep 30					#Wait for disc to read
+	abcde	-d $CDROM				#Rip disc
 	echo "Ripping finished"
-	eject $CDROM							#Eject disc tray
-	sleep 3									#Wait for tray to open
+	eject $CDROM					#Eject disc tray
+	sleep 3						#Wait for tray to open
 	command_robot "G00" "Get disc from tray"
 	echo "Close tray"
-	eject -t $CDROM							#Close tray
+	eject -t $CDROM					#Close tray
 	command_robot "R00" "Drop disc in bin"
 }
 #Initialize robot
-reset_robot									#Reset Robot
-command_robot V00 Version					#Get version
+reset_robot						#Reset Robot
+command_robot V00 Version				#Get version
 while true
 do
   rip_disc
